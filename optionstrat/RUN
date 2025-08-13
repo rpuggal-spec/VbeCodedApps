@@ -1,0 +1,15 @@
+How to Run
+
+Start backend:
+
+cd server
+node index.js
+
+
+Start frontend:
+
+cd client
+npm run dev
+
+
+Open browser → http://localhost:5173 (or Vite’s given port)
