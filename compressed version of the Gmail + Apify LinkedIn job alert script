@@ -1,0 +1,28 @@
+import requests,smtplib,os,json,logging
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from logging.handlers import RotatingFileHandler
+fmt=logging.Formatter("%(asctime)s [%(levelname)s] %(message)s")
+fh=RotatingFileHandler("job_alerts.log",maxBytes=1_000_000,backupCount=5);fh.setFormatter(fmt)
+sh=logging.StreamHandler();sh.setFormatter(fmt)
+logging.basicConfig(level=logging.INFO,handlers=[sh,fh])
+APIFY_TOKEN,ACTOR_ID,EMAIL_USER,EMAIL_PASS,RECIPIENT=os.getenv("APIFY_TOKEN"),"apify/linkedIn-jobs-scraper",os.getenv("EMAIL_USER"),os.getenv("EMAIL_PASS"),"you@example.com"
+def run_apify_actor():
+    logging.info("Fetching jobs...");r=requests.post(f"https://api.apify.com/v2/acts/{ACTOR_ID}/run-sync-get-dataset-items?token={APIFY_TOKEN}",json={"searchKeywords":["technical sales"],"location":"United States","maxResults":25});r.raise_for_status();j=r.json();logging.info(f"{len(j)} job(s)");return j
+def load_seen():
+    if os.path.exists("seen.json"):s=set(json.load(open("seen.json")));logging.info(f"{len(s)} seen");return s
+    return set()
+def save_seen(ids):json.dump(list(ids),open("seen.json","w"))
+def send_email(jobs):
+    if not jobs:return
+    rows="".join(f"<tr><td>{j['title']}</td><td>{j['companyName']}</td><td><a href='{j['link']}'>View</a></td></tr>"for j in jobs)
+    msg=MIMEMultipart("alternative");msg["Subject"]="New Technical Sales Jobs";msg["From"]=EMAIL_USER;msg["To"]=RECIPIENT
+    msg.attach(MIMEText(f"<html><body><table border='1'><tr><th>Title</th><th>Company</th><th>Link</th></tr>{rows}</table></body></html>","html"))
+    with smtplib.SMTP_SSL("smtp.gmail.com",465) as s:s.login(EMAIL_USER,EMAIL_PASS);s.sendmail(EMAIL_USER,[RECIPIENT],msg.as_string())
+def main():
+    seen,jobs,new=load_seen(),run_apify_actor(),[]
+    for job in jobs:
+        i=job.get("id")or job.get("url")
+        if i and i not in seen:new.append({"title":job.get("title"),"companyName":job.get("companyName"),"link":job.get("url")});seen.add(i)
+    if new:send_email(new);save_seen(seen)
+if __name__=="__main__":main()
