@@ -1,0 +1,25 @@
+[User's OS + Meeting App]
+           ↑
+  [Overlay UI—transparent, floating] ↔ [Context Capture (screen + mic)]
+                         ↓
+            [AI Backend (LLM + state)]
+                         ↓
+      [Overlay UI displays suggestions as needed]
+
+
+
+# Overlay Window (e.g., using PyQt or Electron)
+overlay = OverlayWindow(translucent=True, top_most=True)
+
+# Context Capture Loop
+while True:
+    screen = capture_screen()              # e.g., PIL + OCR
+    audio_snippet = capture_audio()        # e.g., microphone snippet
+    context = combine(screen, audio_snippet)
+
+    # Only trigger API if in active conversation
+    if is_conversation_active(context):
+        suggestion = ai_backend.get_suggestion(context)
+        overlay.display(suggestion)
+
+    sleep(0.5)  # tune for responsiveness
