@@ -1,0 +1,28 @@
+myfitnesspal-clone/
+│
+├── backend/                  # Node.js + Express + PostgreSQL (Prisma ORM)
+│   ├── src/
+│   │   ├── routes/           # API route handlers
+│   │   ├── controllers/      # Business logic
+│   │   ├── models/           # Prisma schema
+│   │   ├── middleware/       # Auth, validation
+│   │   ├── utils/            # Helpers
+│   │   └── seed.js           # Seed data script
+│   ├── package.json
+│   ├── .env.example
+│   └── prisma/schema.prisma
+│
+├── frontend/                 # React Native (Expo)
+│   ├── src/
+│   │   ├── screens/
+│   │   ├── components/
+│   │   ├── navigation/
+│   │   ├── hooks/
+│   │   └── theme/
+│   ├── App.js
+│   ├── package.json
+│   └── assets/
+│
+├── README.md                 # Project overview + setup
+├── .gitignore
+└── LICENSE
