@@ -1,0 +1,12 @@
+Frontend (client/)
+Tech:
+
+React + Vite – Fast dev setup
+
+Tailwind CSS + shadcn/ui – Modern styling
+
+Axios – Fetch from our Node API
+
+Recharts – Payoff diagram
+
+Zustand – State management for strategies
