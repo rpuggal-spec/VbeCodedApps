@@ -1,0 +1,9 @@
+MVP Goals
+
+Runs locally with no API setup needed
+
+Supports single-leg calls & puts
+
+Uses sandbox data so you can play without risk
+
+Preps architecture for multi-leg upgrade later
