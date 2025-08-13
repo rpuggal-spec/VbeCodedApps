@@ -1,0 +1,29 @@
+📂 optionstrat-clone/
+ ├─ 📂 client/         # React + Tailwind + shadcn/ui
+ ├─ 📂 server/         # Node.js + Express API
+ ├─ package.json
+ ├─ README.md
+
+
+Backend (server/)
+Tech:
+
+Express.js – REST API endpoints
+
+Axios – Call Tradier API
+
+dotenv – Store your Tradier API key securely
+
+CORS – Allow requests from your React frontend
+
+Example API:
+
+GET /api/options/:symbol/:expiration
+
+Returns filtered option chain for given ticker & expiration.
+
+GET /api/quote/:symbol
+
+Returns live stock price.
+
+
