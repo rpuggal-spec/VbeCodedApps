@@ -1,0 +1,42 @@
+Features Breakdown
+
+Always-on-top translucent overlay (invisible to others, even during screen share)
+
+OCR + speech recognition layers for continuous context awareness
+
+Adaptive throttling to reduce lag—e.g. only query AI when speech or screen changes detected
+
+Local memory/session tracking: helps refine prompts to your style/recurring needs
+
+Design Rationale – Why This Approach?
+
+Invisible Coaching: The overlay behaves like a whisper, supporting without distracting—kind of like Cluely’s “live coaching” model.
+The Times
++12
+Medium
++12
+tl;dv
++12
+Honorlock Online Proctoring
+tl;dv
++4
+TechCrunch
++4
+Business Insider
++4
+tl;dv
+The Times
+BitDegree
+
+Contextually Relevant: AI understands the live situation—“chemistry, definitions, personal bios”—just like Cluely selling itself on real-time relevance.
+Business Insider
++12
+Business Insider
++12
+The Verge
++12
+
+Minimal UI Interruption: Subtle prompts maintain presence but don’t disrupt focus—aligning with the stealth overlay philosophy.
+Medium
+
+Scalable & Modular: Each component can be upgraded independently—OCR models, voice detection, LLM backend, UI framework.
