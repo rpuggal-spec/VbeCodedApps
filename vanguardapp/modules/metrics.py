@@ -1,25 +1,53 @@
+# modules/metrics.py
 import pandas as pd
 
-def calculate_metrics(holdings_df, price_df):
-    """
-    Merge holdings with price data and calculate metrics:
-    Daily %, Weekly %, YTD %, Unrealized P/L ($ and %)
-    """
-    merged = pd.merge(holdings_df, price_df, on="Symbol", how="inner")
+def _coerce_symbol(df: pd.DataFrame) -> pd.DataFrame:
+    df = df.copy()
+    df.columns = [str(c).strip() for c in df.columns]
 
-    merged["Shares"] = pd.to_numeric(merged["Shares"], errors="coerce").fillna(0)
-    merged["Cost Basis"] = pd.to_numeric(merged.get("Cost Basis", 0), errors="coerce").fillna(0)
+    # If symbols live in the index, pull them out
+    if df.index.name and df.index.name.strip().lower() in ("symbol", "ticker"):
+        df = df.reset_index()
 
-    merged["Daily %"] = ((merged["Current Price"] - merged["Price_1D_Ago"]) / merged["Price_1D_Ago"]) * 100
-    merged["Weekly %"] = ((merged["Current Price"] - merged["Price_1W_Ago"]) / merged["Price_1W_Ago"]) * 100
-    merged["YTD %"] = ((merged["Current Price"] - merged["Price_YTD"]) / merged["Price_YTD"]) * 100
+    # Find a symbol-like column
+    candidates = [
+        "Symbol","symbol","Ticker","ticker","Ticker Symbol","Security Symbol","Asset","asset"
+    ]
+    found = next((c for c in candidates if c in df.columns), None)
 
-    merged["Current Value"] = merged["Shares"] * merged["Current Price"]
-    merged["Cost Value"] = merged["Shares"] * merged["Cost Basis"]
-    merged["Unrealized P/L $"] = merged["Current Value"] - merged["Cost Value"]
-    merged["Unrealized P/L %"] = (merged["Unrealized P/L $"] / merged["Cost Value"]) * 100
+    if found is None:
+        # Wide price format: Date + one column per ticker -> melt to long
+        if "Date" in df.columns:
+            value_cols = [c for c in df.columns if c != "Date"]
+            if value_cols:
+                long = df.melt(id_vars=["Date"], var_name="Symbol", value_name="Price")
+                long["Symbol"] = long["Symbol"].astype(str).str.strip().str.upper()
+                return long
+        raise KeyError(f"No symbol-like column. Columns: {list(df.columns)}")
 
-    metric_cols = ["Daily %", "Weekly %", "YTD %", "Unrealized P/L $", "Unrealized P/L %", "Current Value"]
-    merged[metric_cols] = merged[metric_cols].round(2)
+    df = df.rename(columns={found: "Symbol"})
+    df["Symbol"] = df["Symbol"].astype(str).str.strip().str.upper()
+    return df
+
+def calculate_metrics(holdings_df: pd.DataFrame, price_df: pd.DataFrame) -> pd.DataFrame:
+    h = _coerce_symbol(holdings_df)
+    p = _coerce_symbol(price_df)
+
+    # If price frame is long-form with Date/Close naming, normalize names
+    if "Price" not in p.columns:
+        # Common yahoo schema: ['Symbol','Date','Close']
+        if "Close" in p.columns:
+            p = p.rename(columns={"Close": "Price"})
+        elif "Adj Close" in p.columns:
+            p = p.rename(columns={"Adj Close": "Price"})
+
+    merged = pd.merge(h, p, on="Symbol", how="inner")
+
+    # Your metrics here. Example placeholders:
+    # Assume holdings has 'Quantity' and 'CostBasis'; price has latest 'Price'
+    if "Quantity" in merged.columns and "Price" in merged.columns:
+        merged["MarketValue"] = merged["Quantity"] * merged["Price"]
+    if {"Price","CostBasis"}.issubset(merged.columns):
+        merged["UnrealizedPnL"] = merged["Price"] - merged["CostBasis"]
 
     return merged
